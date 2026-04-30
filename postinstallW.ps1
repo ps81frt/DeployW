@@ -216,8 +216,6 @@ if ($RUN_LINUXTOOLS) {
 
 $linuxDir     = "C:\Program Files\LinuxToolOn-Windows"
 $linuxVersion = "$linuxDir\.version"
-# Sentinel fiable : fichier .version dans le dossier d installation
-# (System32\ls.exe n existe pas - ls est un alias PowerShell natif)
 if (Test-Path $linuxVersion) {
     Write-Host "[SKIP] LinuxToolOn-Windows deja installe ($(Get-Content $linuxVersion -Raw))" -ForegroundColor Cyan
     "[$(Get-Date)] SKIP LinuxToolOn-Windows already installed" | Out-File $log -Append
@@ -227,7 +225,6 @@ if (Test-Path $linuxVersion) {
     New-Item -ItemType Directory -Path $linuxDir -Force | Out-Null
     Invoke-WebRequest -Uri "https://github.com/ps81frt/LinuxToolsOnWindows/releases/latest/download/LinuxToolOn-Windows.zip" -OutFile "$env:TEMP\LinuxToolOn-Windows.zip"
     Expand-Archive "$env:TEMP\LinuxToolOn-Windows.zip" -DestinationPath $linuxDir -Force
-    # Le zip peut extraire dans un sous-dossier -> chercher recursivement
     $exes = Get-ChildItem $linuxDir -Filter "*.exe" -Recurse
     if ($exes.Count -eq 0) {
         Write-Host "  [ERREUR] LinuxTools : aucun exe trouve dans l archive" -ForegroundColor Red
