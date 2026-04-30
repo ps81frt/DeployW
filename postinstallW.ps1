@@ -13,15 +13,15 @@ trap { "[$(Get-Date)] ERROR: $_" | Out-File $log -Append }
 # CONFIGURATION
 # ============================================================
 
-$RUN_MODULES     = $false
-$RUN_LINUXTOOLS  = $false
-$RUN_WINTOOLKIT  = $false
-$RUN_PASTEBINIT  = $false
-$RUN_HCICONF     = $false
-$RUN_WINGET      = $false
-$RUN_GH_RELEASES = $false
-$RUN_DOTFILES    = $false
-$RUN_HARDENING   = $false
+$RUN_MODULES     = $true
+$RUN_LINUXTOOLS  = $true
+$RUN_WINTOOLKIT  = $true
+$RUN_PASTEBINIT  = $true
+$RUN_HCICONF     = $true
+$RUN_WINGET      = $true
+$RUN_GH_RELEASES = $true
+$RUN_DOTFILES    = $true
+$RUN_HARDENING   = $true
 $RUN_LOCKSCREEN  = $true
 $RUN_BACKGROUND  = $true
 
