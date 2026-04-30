@@ -1,4 +1,4 @@
-﻿# ============================================================
+# ============================================================
 # POST-INSTALL - ps81frt
 # Run as Administrator
 # ============================================================
@@ -13,15 +13,15 @@ trap { "[$(Get-Date)] ERROR: $_" | Out-File $log -Append }
 # CONFIGURATION
 # ============================================================
 
-$RUN_MODULES     = $true
-$RUN_LINUXTOOLS  = $true
-$RUN_WINTOOLKIT  = $true
-$RUN_PASTEBINIT  = $true
-$RUN_HCICONF     = $true
-$RUN_WINGET      = $true
-$RUN_GH_RELEASES = $true
-$RUN_DOTFILES    = $true
-$RUN_HARDENING   = $true
+$RUN_MODULES     = $false
+$RUN_LINUXTOOLS  = $false
+$RUN_WINTOOLKIT  = $false
+$RUN_PASTEBINIT  = $false
+$RUN_HCICONF     = $false
+$RUN_WINGET      = $false
+$RUN_GH_RELEASES = $false
+$RUN_DOTFILES    = $false
+$RUN_HARDENING   = $false
 $RUN_LOCKSCREEN  = $true
 $RUN_BACKGROUND  = $true
 
@@ -216,6 +216,8 @@ if ($RUN_LINUXTOOLS) {
 
 $linuxDir     = "C:\Program Files\LinuxToolOn-Windows"
 $linuxVersion = "$linuxDir\.version"
+# Sentinel fiable : fichier .version dans le dossier d installation
+# (System32\ls.exe n existe pas - ls est un alias PowerShell natif)
 if (Test-Path $linuxVersion) {
     Write-Host "[SKIP] LinuxToolOn-Windows deja installe ($(Get-Content $linuxVersion -Raw))" -ForegroundColor Cyan
     "[$(Get-Date)] SKIP LinuxToolOn-Windows already installed" | Out-File $log -Append
@@ -225,6 +227,7 @@ if (Test-Path $linuxVersion) {
     New-Item -ItemType Directory -Path $linuxDir -Force | Out-Null
     Invoke-WebRequest -Uri "https://github.com/ps81frt/LinuxToolsOnWindows/releases/latest/download/LinuxToolOn-Windows.zip" -OutFile "$env:TEMP\LinuxToolOn-Windows.zip"
     Expand-Archive "$env:TEMP\LinuxToolOn-Windows.zip" -DestinationPath $linuxDir -Force
+    # Le zip peut extraire dans un sous-dossier -> chercher recursivement
     $exes = Get-ChildItem $linuxDir -Filter "*.exe" -Recurse
     if ($exes.Count -eq 0) {
         Write-Host "  [ERREUR] LinuxTools : aucun exe trouve dans l archive" -ForegroundColor Red
@@ -810,7 +813,8 @@ Disable-ScheduledTask -TaskName "npcapwatchdog" -ErrorAction SilentlyContinue | 
 
 }
 
-# ============================================================
+
+# ========================================================
 # LOCKSCREEN
 # ============================================================
 
@@ -877,8 +881,9 @@ if ($RUN_BACKGROUND) {
     Write-Host "[...] Configuration Background..." -ForegroundColor Yellow
     "[$(Get-Date)] START Background" | Out-File $log -Append
 
+    $lsDir     = "C:\LockScreen"
     $bgGPO     = $true                       # true = force HKLM (tous users, non modifiable) | false = HKCU (user courant, modifiable)
-    $bgFile    = "backgroundDefault2.jpg"    # <- nom du fichier background dans LockScreen\
+    $bgFile    = "backgroundDefault.jpg"    # <- nom du fichier background dans LockScreen\
     $bgImg     = "$lsDir\$bgFile"
     $bgRegPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\PersonalizationCSP"
 
@@ -908,11 +913,15 @@ public class Wallpaper {
             Write-Host "[OK] Background configure (user - modifiable)" -ForegroundColor Green
             "[$(Get-Date)] INSTALLED Background user $bgImg" | Out-File $log -Append
         }
+        RUNDLL32.EXE user32.dll, UpdatePerUserSystemParameters 1, True
+        Start-Sleep -Seconds 1
+        Stop-Process -Name explorer -Force
+        Start-Sleep -Seconds 2
+        Start-Process explorer
     } else {
         Write-Host "[SKIP] Background image absente : $bgImg" -ForegroundColor Cyan
         "[$(Get-Date)] SKIP Background image missing $bgImg" | Out-File $log -Append
     }
-
 }
 
 # ============================================================
